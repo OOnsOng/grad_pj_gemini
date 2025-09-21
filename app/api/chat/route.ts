@@ -96,14 +96,10 @@ export async function POST(req: NextRequest) {
     }
 
     // ✅ generateContent 타입 맞춤
-    const result = await model.generateContent({
-      contents: [
-        {
-          role: 'user',
-          parts,
-        },
-      ],
-    });
+    const result: Awaited<ReturnType<typeof model.generateContent>> =
+      await model.generateContent({
+        contents: [{ role: 'user', parts }],
+      });
 
     const text = result.response.text();
 
