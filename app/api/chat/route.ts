@@ -2,7 +2,8 @@ import { NextRequest } from 'next/server';
 import { z } from 'zod';
 import { ENV } from '@/lib/env';
 import { rateLimit } from '@/lib/rateLimit';
-import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
+import type { TextPart, InlineDataPart } from '@google/generative-ai';
+import { GoogleGenerativeAI } from '@google/generative-ai'; // SchemaType 제거API 키 가져오기AAzsxZza
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -81,7 +82,10 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const parts: any[] = [];
+    // ✅ parts 타입 명확히 지정
+
+    const parts: (TextPart | InlineDataPart)[] = [];
+
     if (last.content && last.content.trim().length > 0) {
       parts.push({ text: last.content });
     }
@@ -91,9 +95,16 @@ export async function POST(req: NextRequest) {
       });
     }
 
+    // ✅ generateContent 타입 맞춤
     const result = await model.generateContent({
-      contents: [{ role: 'user', parts }],
+      contents: [
+        {
+          role: 'user',
+          parts,
+        },
+      ],
     });
+
     const text = result.response.text();
 
     return new Response(JSON.stringify({ reply: text, remaining }), {
