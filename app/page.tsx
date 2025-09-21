@@ -1,103 +1,154 @@
-import Image from "next/image";
+'use client';
+import { useRef, useState } from 'react';
+
+type ChatMessage = {
+  role: 'user' | 'model';
+  content: string;
+  imageUrl?: string;
+};
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  async function onSend() {
+    if (!input && !file) return;
+    if (file) {
+      const maxBytes = 6 * 1024 * 1024; // ~6MB
+      const allowed = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowed.includes(file.type)) {
+        setMessages((m) => [
+          ...m,
+          {
+            role: 'model',
+            content: '이미지 형식은 JPEG/PNG/WebP만 지원합니다.',
+          },
+        ]);
+        return;
+      }
+      if (file.size > maxBytes) {
+        setMessages((m) => [
+          ...m,
+          { role: 'model', content: '이미지 용량이 너무 큽니다. 최대 6MB.' },
+        ]);
+        return;
+      }
+    }
+    setLoading(true);
+    const imageBase64 = file ? await toBase64(file) : undefined;
+    const imageMimeType = file?.type;
+
+    const userMsg: ChatMessage = {
+      role: 'user',
+      content: input,
+      imageUrl: imageBase64 ? URL.createObjectURL(file as File) : undefined,
+    };
+    setMessages((m) => [...m, userMsg]);
+    setInput('');
+    setFile(null);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+
+    const res = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        messages: [
+          {
+            role: 'user',
+            content: userMsg.content,
+            imageBase64: imageBase64?.split(',')[1],
+            imageMimeType,
+          },
+        ],
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      setMessages((m) => [
+        ...m,
+        { role: 'model', content: data.error || '오류가 발생했어요.' },
+      ]);
+    } else {
+      setMessages((m) => [...m, { role: 'model', content: data.reply }]);
+    }
+    setLoading(false);
+  }
+
+  return (
+    <main className="mx-auto max-w-3xl p-6">
+      <h1 className="text-2xl font-semibold mb-4">Gemini 대화형 챗봇</h1>
+      <div className="space-y-4">
+        <div className="border rounded-lg p-4 h-[60vh] overflow-y-auto bg-white">
+          {messages.length === 0 && (
+            <p className="text-black-500">
+              메시지를 입력하고 필요하면 이미지를 첨부하세요.
+            </p>
+          )}
+          <div className="space-y-3">
+            {messages.map((m, idx) => (
+              <div
+                key={idx}
+                className={m.role === 'user' ? 'text-right' : 'text-left'}
+              >
+                <div
+                  className={
+                    'inline-block rounded-xl px-4 py-2 ' +
+                    (m.role === 'user'
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100')
+                  }
+                >
+                  <p className="whitespace-pre-wrap">{m.content}</p>
+                  {m.imageUrl && (
+                    <img
+                      src={m.imageUrl}
+                      alt="uploaded"
+                      className="mt-2 max-h-48 rounded-md inline-block"
+                    />
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
+        <div className="flex items-center gap-2">
+          <input
+            type="file"
+            accept="image/*"
+            ref={fileInputRef}
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+            className="block w-48 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50"
           />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') onSend();
+            }}
+            placeholder="메시지를 입력하세요"
+            className="flex-1 border rounded-lg px-3 py-2"
           />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+          <button
+            onClick={onSend}
+            disabled={loading}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg disabled:opacity-60"
+          >
+            {loading ? '전송 중...' : '전송'}
+          </button>
+        </div>
+      </div>
+    </main>
   );
+}
+
+async function toBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = (error) => reject(error);
+  });
 }
