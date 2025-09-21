@@ -79,12 +79,12 @@ export default function Home() {
 
   return (
     <main className="mx-auto max-w-3xl p-6">
-      <h1 className="text-2xl font-semibold mb-4">Gemini 대화형 챗봇</h1>
+      <h1 className="text-2xl font-semibold mb-4">AI 한글 암호 전쟁</h1>
       <div className="space-y-4">
         <div className="border rounded-lg p-4 h-[60vh] overflow-y-auto bg-white">
           {messages.length === 0 && (
-            <p className="text-black-500">
-              메시지를 입력하고 필요하면 이미지를 첨부하세요.
+            <p className="text-gray-500">
+              제작한 한글 암호 사진을 업로드해서 AI 해독을 시도해보세요.
             </p>
           )}
           <div className="space-y-3">
@@ -98,7 +98,7 @@ export default function Home() {
                     'inline-block rounded-xl px-4 py-2 ' +
                     (m.role === 'user'
                       ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100')
+                      : 'bg-gray-100 text-black')
                   }
                 >
                   <p className="whitespace-pre-wrap">{m.content}</p>
@@ -128,7 +128,7 @@ export default function Home() {
             onKeyDown={(e) => {
               if (e.key === 'Enter') onSend();
             }}
-            placeholder="메시지를 입력하세요"
+            placeholder="암호를 입력하세요"
             className="flex-1 border rounded-lg px-3 py-2"
           />
           <button
