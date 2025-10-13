@@ -1,5 +1,6 @@
 'use client';
 import { useRef, useState } from 'react';
+import Image from 'next/image';
 
 type ChatMessage = {
   role: 'user' | 'model';
@@ -79,9 +80,34 @@ export default function Home() {
 
   return (
     <main className="mx-auto max-w-3xl p-4 sm:p-6">
-      <h1 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 text-center">
-        AI 한글 암호 전쟁
-      </h1>
+      {/* ✅ 여기가 기존 <h1> 자리에 들어갈 부분 */}
+      <div className="flex justify-center mb-4">
+        <Image
+          src="/logo_big.png" // public/logo.png 경로
+          alt="AI 한글 암호 전쟁 로고"
+          width={360} // 로고 크기 (가로 px)
+          height={120} // 로고 크기 (세로 px)
+          className="object-contain"
+          priority
+        />
+      </div>
+
+      {/* 트레일러 영상 섹션 */}
+      <section className="text-center">
+        <h2
+          className="text-xl font-semibold mb-4 text-left"
+          style={{ color: '#024a9b', marginTop: '2rem' }} // 색상 + 간격 조정
+        >
+          트레일러 영상
+        </h2>
+        <div className="aspect-video w-full rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+          <video
+            src="/trailer.mp4" // 🎥 public/trailer.mp4 파일 경로
+            controls
+            className="w-full h-full object-cover"
+          />
+        </div>
+      </section>
 
       <div className="space-y-3 sm:space-y-4">
         {/* 채팅 영역 */}
@@ -122,14 +148,20 @@ export default function Home() {
         </div>
 
         {/* 입력 영역 */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-          <input
-            type="file"
-            accept="image/*"
-            ref={fileInputRef}
-            onChange={(e) => setFile(e.target.files?.[0] || null)}
-            className="block w-full sm:w-48 text-sm border border-gray-300 rounded-lg cursor-pointer bg-gray-50"
-          />
+        <div className="flex items-center gap-2 w-full">
+          {/* 파일 선택 버튼 */}
+          <label className="flex items-center justify-center bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm cursor-pointer whitespace-nowrap flex-shrink-0 hover:bg-gray-200 transition">
+            📎
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              onChange={(e) => setFile(e.target.files?.[0] || null)}
+              className="hidden"
+            />
+          </label>
+
+          {/* 텍스트 입력창 */}
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -137,12 +169,14 @@ export default function Home() {
               if (e.key === 'Enter') onSend();
             }}
             placeholder="암호를 입력하세요"
-            className="flex-1 border rounded-lg px-3 py-2 text-sm sm:text-base"
+            className="flex-1 border rounded-lg px-3 py-2 text-sm sm:text-base min-w-0"
           />
+
+          {/* 전송 버튼 */}
           <button
             onClick={onSend}
             disabled={loading}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg disabled:opacity-60 text-sm sm:text-base"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg whitespace-nowrap flex-shrink-0 hover:bg-blue-700 disabled:opacity-60 text-sm sm:text-base transition"
           >
             {loading ? '전송 중...' : '전송'}
           </button>
