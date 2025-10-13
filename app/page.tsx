@@ -17,7 +17,7 @@ export default function Home() {
   async function onSend() {
     if (!input && !file) return;
     if (file) {
-      const maxBytes = 6 * 1024 * 1024; // ~6MB
+      const maxBytes = 6 * 1024 * 1024;
       const allowed = ['image/jpeg', 'image/png', 'image/webp'];
       if (!allowed.includes(file.type)) {
         setMessages((m) => [
@@ -78,12 +78,16 @@ export default function Home() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <h1 className="text-2xl font-semibold mb-4">AI 한글 암호 전쟁</h1>
-      <div className="space-y-4">
-        <div className="border rounded-lg p-4 h-[60vh] overflow-y-auto bg-white">
+    <main className="mx-auto max-w-3xl p-4 sm:p-6">
+      <h1 className="text-xl sm:text-2xl font-semibold mb-3 sm:mb-4 text-center">
+        AI 한글 암호 전쟁
+      </h1>
+
+      <div className="space-y-3 sm:space-y-4">
+        {/* 채팅 영역 */}
+        <div className="border rounded-lg p-3 sm:p-4 min-h-[50vh] max-h-[70vh] overflow-y-auto bg-white">
           {messages.length === 0 && (
-            <p className="text-gray-500">
+            <p className="text-gray-500 text-sm sm:text-base text-center">
               제작한 한글 암호 사진을 업로드해서 AI 해독을 시도해보세요.
             </p>
           )}
@@ -95,18 +99,20 @@ export default function Home() {
               >
                 <div
                   className={
-                    'inline-block rounded-xl px-4 py-2 ' +
+                    'inline-block rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 ' +
                     (m.role === 'user'
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-100 text-black')
                   }
                 >
-                  <p className="whitespace-pre-wrap">{m.content}</p>
+                  <p className="whitespace-pre-wrap text-sm sm:text-base">
+                    {m.content}
+                  </p>
                   {m.imageUrl && (
                     <img
                       src={m.imageUrl}
                       alt="uploaded"
-                      className="mt-2 max-h-48 rounded-md inline-block"
+                      className="mt-2 max-h-40 sm:max-h-48 rounded-md inline-block"
                     />
                   )}
                 </div>
@@ -114,13 +120,15 @@ export default function Home() {
             ))}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+
+        {/* 입력 영역 */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <input
             type="file"
             accept="image/*"
             ref={fileInputRef}
             onChange={(e) => setFile(e.target.files?.[0] || null)}
-            className="block w-48 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50"
+            className="block w-full sm:w-48 text-sm border border-gray-300 rounded-lg cursor-pointer bg-gray-50"
           />
           <input
             value={input}
@@ -129,12 +137,12 @@ export default function Home() {
               if (e.key === 'Enter') onSend();
             }}
             placeholder="암호를 입력하세요"
-            className="flex-1 border rounded-lg px-3 py-2"
+            className="flex-1 border rounded-lg px-3 py-2 text-sm sm:text-base"
           />
           <button
             onClick={onSend}
             disabled={loading}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg disabled:opacity-60"
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg disabled:opacity-60 text-sm sm:text-base"
           >
             {loading ? '전송 중...' : '전송'}
           </button>
