@@ -100,12 +100,16 @@ export default function Home() {
         >
           트레일러 영상
         </h2>
-        <div className="aspect-video w-full rounded-lg overflow-hidden border border-gray-200 shadow-sm">
-          <video
-            src="/trailer.mp4" // 🎥 public/trailer.mp4 파일 경로
-            controls
-            className="w-full h-full object-cover"
-          />
+        <div className="mb-16">
+          {' '}
+          {/* 여기서 간격 조절 */}
+          <div className="aspect-video w-full rounded-lg overflow-hidden border border-gray-200 shadow-sm">
+            <video
+              src="/trailer.mp4" // 🎥 public/trailer.mp4 파일 경로
+              controls
+              className="w-full h-full object-cover"
+            />
+          </div>
         </div>
       </section>
 
