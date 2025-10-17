@@ -139,7 +139,7 @@ export default function Home() {
         {/* ✅ 입력 영역 */}
         <div className="flex items-stretch gap-2 w-full shrink-0">
           {/* 파일 선택 버튼 */}
-          <label className="flex items-center justify-center bg-white border-[2px] border-[#024a9b] rounded-lg px-4 text-sm cursor-pointer whitespace-nowrap flex-shrink-0 hover:bg-[#f0f6ff] transition text-[#024a9b] h-11 sm:h-12">
+          <label className="flex items-center justify-center bg-white border-[2px] border-[#024a9b] rounded-lg px-4 text-xl cursor-pointer whitespace-nowrap flex-shrink-0 hover:bg-[#f0f6ff] transition text-[#024a9b] h-11 sm:h-12">
             📎
             <input
               type="file"
