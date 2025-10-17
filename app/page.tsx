@@ -79,45 +79,24 @@ export default function Home() {
   }
 
   return (
-    <main className="mx-auto max-w-3xl p-4 sm:p-6">
-      {/* ✅ 여기가 기존 <h1> 자리에 들어갈 부분 */}
-      <div className="flex justify-center mb-4">
+    <main className="flex flex-col h-screen mx-auto max-w-3xl p-4 sm:p-6 text-[#024a9b] bg-white">
+      {/* ✅ 로고 영역 (위 여백 포함) */}
+      <div className="flex justify-center mb-6 mt-6 shrink-0">
         <Image
-          src="/logo_big.png" // public/logo.png 경로
+          src="/logo_big.png"
           alt="AI 한글 암호 전쟁 로고"
-          width={360} // 로고 크기 (가로 px)
-          height={120} // 로고 크기 (세로 px)
+          width={360}
+          height={120}
           className="object-contain"
           priority
         />
       </div>
 
-      {/* 트레일러 영상 섹션 */}
-      <section className="text-center">
-        <h2
-          className="text-xl font-semibold mb-4 text-left"
-          style={{ color: '#024a9b', marginTop: '2rem' }} // 색상 + 간격 조정
-        >
-          트레일러 영상
-        </h2>
-        <div className="mb-16">
-          {' '}
-          {/* 여기서 간격 조절 */}
-          <div className="aspect-video w-full rounded-lg overflow-hidden border border-gray-200 shadow-sm">
-            <video
-              src="/trailer.mp4" // 🎥 public/trailer.mp4 파일 경로
-              controls
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </div>
-      </section>
-
-      <div className="space-y-3 sm:space-y-4">
-        {/* 채팅 영역 */}
-        <div className="border rounded-lg p-3 sm:p-4 min-h-[50vh] max-h-[70vh] overflow-y-auto bg-white">
+      {/* ✅ 채팅 영역 (화면 남는 부분을 모두 채움) */}
+      <div className="flex flex-col flex-grow space-y-3 sm:space-y-4 overflow-hidden">
+        <div className="flex-grow border border-[#024a9b] rounded-lg p-3 sm:p-4 overflow-y-auto bg-white">
           {messages.length === 0 && (
-            <p className="text-gray-500 text-sm sm:text-base text-center">
+            <p className="text-[#024a9b] text-sm sm:text-base text-center">
               제작한 한글 암호 사진을 업로드해서 AI 해독을 시도해보세요.
             </p>
           )}
@@ -131,8 +110,8 @@ export default function Home() {
                   className={
                     'inline-block rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 ' +
                     (m.role === 'user'
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-black')
+                      ? 'bg-[#024a9b] text-white'
+                      : 'bg-gray-100 text-[#024a9b]')
                   }
                 >
                   <p className="whitespace-pre-wrap text-sm sm:text-base">
@@ -142,7 +121,7 @@ export default function Home() {
                     <img
                       src={m.imageUrl}
                       alt="uploaded"
-                      className="mt-2 max-h-40 sm:max-h-48 rounded-md inline-block"
+                      className="mt-2 max-h-40 sm:max-h-48 rounded-md inline-block border border-[#024a9b]"
                     />
                   )}
                 </div>
@@ -151,10 +130,10 @@ export default function Home() {
           </div>
         </div>
 
-        {/* 입력 영역 */}
-        <div className="flex items-center gap-2 w-full">
+        {/* ✅ 입력 영역 (하단 고정 느낌) */}
+        <div className="flex items-center gap-2 w-full shrink-0">
           {/* 파일 선택 버튼 */}
-          <label className="flex items-center justify-center bg-gray-100 border border-gray-300 rounded-lg px-3 py-2 text-sm cursor-pointer whitespace-nowrap flex-shrink-0 hover:bg-gray-200 transition">
+          <label className="flex items-center justify-center bg-white border border-[#024a9b] rounded-lg px-3 py-2 text-sm cursor-pointer whitespace-nowrap flex-shrink-0 hover:bg-[#f0f6ff] transition text-[#024a9b]">
             📎
             <input
               type="file"
@@ -173,14 +152,14 @@ export default function Home() {
               if (e.key === 'Enter') onSend();
             }}
             placeholder="암호를 입력하세요"
-            className="flex-1 border rounded-lg px-3 py-2 text-sm sm:text-base min-w-0"
+            className="flex-1 border border-[#024a9b] rounded-lg px-3 py-2 text-sm sm:text-base min-w-0 text-[#024a9b] placeholder-[#6d8db8]"
           />
 
           {/* 전송 버튼 */}
           <button
             onClick={onSend}
             disabled={loading}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg whitespace-nowrap flex-shrink-0 hover:bg-blue-700 disabled:opacity-60 text-sm sm:text-base transition"
+            className="bg-[#024a9b] text-white px-4 py-2 rounded-lg whitespace-nowrap flex-shrink-0 hover:bg-[#013a7c] disabled:opacity-60 text-sm sm:text-base transition"
           >
             {loading ? '전송 중...' : '전송'}
           </button>
