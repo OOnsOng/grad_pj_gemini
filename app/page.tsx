@@ -100,13 +100,13 @@ export default function Home() {
 
       {/* ✅ 채팅 영역 */}
       <div className="flex flex-col flex-grow space-y-3 sm:space-y-4 overflow-hidden">
-        <div className="flex-grow border-[2px] border-[#024a9b] rounded-lg p-3 sm:p-4 overflow-y-auto bg-white mb-4 sm:mb-5">
+        <div className="flex-grow border-[2px] border-[#024a9b] rounded-lg p-3 sm:p-4 overflow-y-auto bg-white mb-4 sm:mb-5 flex flex-col">
           {messages.length === 0 && (
             <p className="text-[#024a9b] text-sm sm:text-base text-center mt-8">
               제작한 한글 암호 사진을 업로드해서 AI 해독을 시도해보세요.
             </p>
           )}
-          <div className="space-y-3">
+          <div className="space-y-3 flex flex-col">
             {messages.map((m, idx) => (
               <div
                 key={idx}
@@ -117,10 +117,11 @@ export default function Home() {
                     'inline-block rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 ' +
                     (m.role === 'user'
                       ? 'bg-[#024a9b] text-white'
-                      : 'bg-gray-100 text-[#024a9b]')
+                      : 'bg-gray-100 text-[#024a9b]') +
+                    ' max-w-[66%]'
                   }
                 >
-                  <p className="whitespace-pre-wrap text-sm sm:text-base">
+                  <p className="whitespace-pre-wrap text-sm sm:text-base text-left">
                     {m.content}
                   </p>
                   {m.imageUrl && (
@@ -133,6 +134,19 @@ export default function Home() {
                 </div>
               </div>
             ))}
+
+            {/* ✅ AI 타이핑 표시 */}
+            {loading && (
+              <div className="text-left">
+                <div className="inline-block rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 bg-gray-100 text-[#024a9b] max-w-[66%]">
+                  <span className="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -163,7 +177,7 @@ export default function Home() {
             onKeyDown={(e) => {
               if (e.key === 'Enter') onSend();
             }}
-            placeholder="암호를 입력하세요"
+            placeholder="AI와 대화해보세요"
             className="flex-1 border-[2px] border-[#024a9b] rounded-lg px-3 text-sm sm:text-base min-w-0 text-[#024a9b] placeholder-[#6d8db8] h-11 sm:h-12"
           />
 
