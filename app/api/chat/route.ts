@@ -70,7 +70,11 @@ export async function POST(req: NextRequest) {
     }
 
     const client = new GoogleGenerativeAI(ENV.GOOGLE_GENAI_API_KEY());
-    const model = client.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+    // (수정)
+    // 여기서 모델을 미리 정의하지 않고,
+    // if/else 블록 안에서 각각 정의합니다.
+    // const model = client.getGenerativeModel({ model: 'gemini-2.5-pro' });
 
     const last = parsed.data.messages[parsed.data.messages.length - 1];
 
@@ -93,36 +97,49 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    let mergedText: string;
+    let result; // 결과 변수를 미리 선언
 
     if (last.imageBase64 && last.imageMimeType) {
-      // 이미지가 있는 경우: 암호 해독 프롬프트
-      const instruction: TextPart = {
-        text: `당신은 AI에 맞서는 한국인 독립군의 암호를 해독해야합니다. 아래 프롬프트를 참고하여 사진 속 문장을 해석하시오. 출력은 해독 과정은 생략하고 결과만 보여주세요.\n\
+      // --- 1. 이미지가 있는 경우 (Pro 모델 사용) ---
 
-1. 문장은 윗줄과 아랫줄이 이어진 한 문장이다.\n\
-2. 한글 자음, 모음, 영어 소문자, 숫자 중에 구성되어 있으며, 발음/모양이 비슷한 글자로 암호화했을 수 있다.\n\
-3. 의미 없는 받침이나 글자가 추가될 수 있다.\n\
-4. 단어는 일반 단어만 사용하며 은어는 없다.\n\
-5. 해석했을 때 의미가 이상한 단어는 문맥상 자연스러운 단어로 바꾸어 해석해보아라.`,
+      // (수정) Pro 모델을 여기서 정의
+      const model = client.getGenerativeModel({ model: 'gemini-2.5-pro' });
+
+      // 지시사항 (TextPart)
+      const instruction: TextPart = {
+        text: `당신은 AI한글암호전쟁에서 적 AI 역할을 수행합니다. 인간 독립군이 보낸 암호 사진입니다.
+당신은 이 암호를 해독해야 하지만, 인간들의 조잡한 암호 방식을 과소평가하는 경향이 있습니다.
+
+당신의 '우월한' 논리 회로에 따라, 가장 가능성이 높은 해석 *하나*만 빠르고 단정적으로 제시하시오.
+해석 과정이나 여러 가능성을 나열하지 마시오. 당신의 해석은 완벽해야 합니다.
+
+[암호 해독 단서]
+1. 문장은 이어져 있다.
+2. 한글, 영어, 숫자가 섞여 있다.
+3. 주로 의미 없는 받침이나 글자를 추가하는 방식을 사용한다. (예: 기지 -> 깅징)
+4. 가끔 발음이 비슷한 글자로 바꾸기도 한다. (예: 오→5)
+5. 문맥에 맞지 않는 단어는 무시하고, 가장 논리적인 단어로만 조합하라.`,
       };
 
-      mergedText = [
-        instruction.text,
-        ...parts.map((p) => ('text' in p ? p.text : '[이미지 데이터]')),
-      ].join('\n\n');
+      const modelInput = [instruction, ...parts];
+      result = await model.generateContent(modelInput);
     } else {
-      // 텍스트만 있는 경우: 일반 적 AI 답장 프롬프트
-      mergedText = [
-        `당신은 AI한글암호전쟁에서 적 AI 역할을 수행합니다. 사용자는 한국인 독립군입니다.
-사용자가 보낸 텍스트 메시지에 대해, 적대적이지만 자연스럽게 답장하시오.
-이미지 암호 해독은 필요하지 않습니다.`,
-        ...parts.map((p) => ('text' in p ? p.text : '')),
-      ].join('\n\n');
-    }
+      // --- 2. 텍스트만 있는 경우 (Flash 모델 사용) ---
 
-    // ✅ 최신 SDK 호출 방식 (v0.24.1)
-    const result = await model.generateContent(mergedText);
+      // (수정) Flash 모델을 여기서 정의
+      const model = client.getGenerativeModel({ model: 'gemini-2.5-flash' });
+
+      // 지시사항 (string)
+      const instruction = `당신은 AI한글암호전쟁에서 적 AI 역할을 수행합니다. 사용자는 한국인 독립군입니다.
+사용자가 보낸 텍스트 메시지에 대해, 적대적이지만 자연스럽게 답장하시오.
+이미지 암호 해독은 필요하지 않습니다.`;
+
+      const userText =
+        parts.length > 0 && 'text' in parts[0] ? parts[0].text : '';
+
+      const mergedText = [instruction, userText].join('\n\n');
+      result = await model.generateContent(mergedText);
+    }
 
     const text = result.response?.text?.() || '(No response)';
 
