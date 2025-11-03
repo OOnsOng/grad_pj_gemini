@@ -139,12 +139,12 @@ export default function Home() {
             <div className="flex-1 overflow-y-auto space-y-3">
               {messages.length === 0 && (
                 <div className="text-center mt-8">
-                  <p className="text-[#024a9b] text-sm sm:text-base">
+                  <p className="text-[#024a9b] text-[15px] sm:text-[17px]">
                     제작한 한글 암호 사진을 업로드해서
                     <br />
                     AI 해독을 시도해보세요.
                   </p>
-                  <p className="text-[#6b7280] text-[12px] mt-1">
+                  <p className="text-[#6b7280] text-[13px] mt-1">
                     *원활한 이용을 위해 데이터를 사용해주세요.
                   </p>
                 </div>
