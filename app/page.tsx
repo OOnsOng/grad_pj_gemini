@@ -144,7 +144,7 @@ export default function Home() {
                     <br />
                     AI 해독을 시도해보세요.
                   </p>
-                  <p className="text-[#6b7280] text-[11px] mt-1">
+                  <p className="text-[#6b7280] text-[12px] mt-1">
                     *원활한 이용을 위해 데이터를 사용해주세요.
                   </p>
                 </div>
