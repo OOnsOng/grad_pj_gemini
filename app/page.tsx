@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 // (수정) 'next/image' 임포트 제거
 // import Image from 'next/image';
 
@@ -15,6 +15,24 @@ export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  // 채팅창 스크롤 컨테이너 ref
+  const chatContainerRef = useRef<HTMLDivElement | null>(null);
+  // 자동 스크롤용 끝 기준 ref
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  // messages 변경 시 자동으로 맨 아래로 스크롤
+  useEffect(() => {
+    // 우선 시각적으로 부드럽게 이동
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      return;
+    }
+    const c = chatContainerRef.current;
+    if (c) {
+      c.scrollTo({ top: c.scrollHeight, behavior: 'smooth' });
+    }
+  }, [messages, loading]);
 
   async function onSend(selectedFile?: File) {
     const activeFile = selectedFile || file;
@@ -58,35 +76,43 @@ export default function Home() {
     setFile(null);
     if (fileInputRef.current) fileInputRef.current.value = '';
 
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        messages: [
-          {
-            role: 'user',
-            content: userMsg.content,
-            imageBase64: imageBase64?.split(',')[1],
-            imageMimeType,
-          },
-        ],
-      }),
-    });
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'user',
+              content: userMsg.content,
+              imageBase64: imageBase64?.split(',')[1],
+              imageMimeType,
+            },
+          ],
+        }),
+      });
 
-    const data = await res.json();
-    if (!res.ok) {
+      const data = await res.json();
+      if (!res.ok) {
+        setMessages((m) => [
+          ...m,
+          { role: 'model', content: data.error || '오류가 발생했어요.' },
+        ]);
+      } else {
+        setMessages((m) => [...m, { role: 'model', content: data.reply }]);
+      }
+    } catch (err) {
       setMessages((m) => [
         ...m,
-        { role: 'model', content: data.error || '오류가 발생했어요.' },
+        { role: 'model', content: '서버 통신 중 오류가 발생했습니다.' },
       ]);
-    } else {
-      setMessages((m) => [...m, { role: 'model', content: data.reply }]);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (
-    <main className="flex flex-col h-svh mx-auto max-w-3xl p-4 sm:p-6 text-[#024a9b] bg-white">
+    <main className="flex flex-col h-screen mx-auto max-w-3xl p-4 sm:p-6 text-[#024a9b] bg-white">
       {/* ✅ 로고 */}
       <div className="flex justify-center mb-4 mt-6 shrink-0">
         {/* (수정) Next.js <Image>를 표준 <img> 태그로 변경 */}
@@ -96,24 +122,29 @@ export default function Home() {
           width={360}
           height={120}
           className="object-contain"
-          // priority 속성 제거
         />
       </div>
 
-      {/* ✅ 채팅 영역 */}
-      <div className="flex flex-col flex-grow space-y-3 sm:space-y-4 overflow-hidden">
-        {/* 1. relative 컨테이너 추가 및 기존 mb 클래스 이동 */}
-        <div className="relative flex-grow mb-4 sm:mb-5">
-          {/* 2. 기존 채팅창: mb 제거, h-full 추가 */}
-          <div className="flex-grow border-[2px] border-[#024a9b] rounded-lg p-3 sm:p-4 overflow-y-auto bg-white flex flex-col h-full">
-            {messages.length === 0 && (
-              <p className="text-[#024a9b] text-sm sm:text-base text-center mt-8">
-                제작한 한글 암호 사진을 업로드해서
-                <br />
-                AI 해독을 시도해보세요.
-              </p>
-            )}
-            <div className="space-y-3 flex flex-col">
+      {/* ✅ 채팅 영역
+          중요: flex 컨테이너에서 자식의 overflow가 동작하려면 부모에 min-h-0 필요 */}
+      <div className="flex flex-col flex-grow space-y-3 sm:space-y-4 min-h-0">
+        {/* relative 컨테이너 (여기에도 min-h-0) */}
+        <div className="relative flex-grow mb-4 sm:mb-5 min-h-0">
+          {/* 채팅창 박스: UI 그대로, 내부에서만 스크롤 가능하게 함 */}
+          <div
+            ref={chatContainerRef}
+            className="flex flex-col border-[2px] border-[#024a9b] rounded-lg p-3 sm:p-4 bg-white h-full min-h-0"
+          >
+            {/* 메시지 리스트 영역 — 이 영역이 실제로 스크롤됨 */}
+            <div className="flex-1 overflow-y-auto space-y-3">
+              {messages.length === 0 && (
+                <p className="text-[#024a9b] text-sm sm:text-base text-center mt-8">
+                  제작한 한글 암호 사진을 업로드해서
+                  <br />
+                  AI 해독을 시도해보세요.
+                </p>
+              )}
+
               {messages.map((m, idx) => (
                 <div
                   key={idx}
@@ -142,7 +173,7 @@ export default function Home() {
                 </div>
               ))}
 
-              {/* ✅ AI 타이핑 표시 */}
+              {/* AI 타이핑 표시 */}
               {loading && (
                 <div className="text-left">
                   <div className="inline-block rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 bg-gray-100 text-[#024a9b] max-w-[66%]">
@@ -154,10 +185,13 @@ export default function Home() {
                   </div>
                 </div>
               )}
+
+              {/* 자동 스크롤 기준점 */}
+              <div ref={messagesEndRef} />
             </div>
           </div>
 
-          {/* 3. Gemini 크레딧 텍스트 추가 */}
+          {/* Gemini 크레딧 텍스트 (겹치지 않게 절대 위치) */}
           <p className="absolute bottom-2 right-3 text-xs text-[#6d8db8] select-none">
             gemini AI를 사용하였습니다.
           </p>
@@ -178,7 +212,7 @@ export default function Home() {
               const selected = e.target.files?.[0];
               if (selected) {
                 setFile(selected);
-                await onSend(selected); // ✅ 선택 즉시 자동 전송
+                await onSend(selected); // 선택 즉시 자동 전송
               }
             }}
           />
@@ -204,10 +238,6 @@ export default function Home() {
           {loading ? '전송 중...' : '전송'}
         </button>
       </div>
-
-      {/* (수정) 
-        여기 있던 여분의 </div> 태그를 삭제했습니다.
-      */}
     </main>
   );
 }
