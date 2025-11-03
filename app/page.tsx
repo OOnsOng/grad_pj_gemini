@@ -108,7 +108,9 @@ export default function Home() {
           <div className="flex-grow border-[2px] border-[#024a9b] rounded-lg p-3 sm:p-4 overflow-y-auto bg-white flex flex-col h-full">
             {messages.length === 0 && (
               <p className="text-[#024a9b] text-sm sm:text-base text-center mt-8">
-                제작한 한글 암호 사진을 업로드해서 AI 해독을 시도해보세요.
+                제작한 한글 암호 사진을 업로드해서
+                <br />
+                AI 해독을 시도해보세요.
               </p>
             )}
             <div className="space-y-3 flex flex-col">
