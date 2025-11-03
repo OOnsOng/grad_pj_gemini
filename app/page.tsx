@@ -138,11 +138,16 @@ export default function Home() {
             {/* 메시지 리스트 영역 — 이 영역이 실제로 스크롤됨 */}
             <div className="flex-1 overflow-y-auto space-y-3">
               {messages.length === 0 && (
-                <p className="text-[#024a9b] text-sm sm:text-base text-center mt-8">
-                  제작한 한글 암호 사진을 업로드해서
-                  <br />
-                  AI 해독을 시도해보세요.
-                </p>
+                <div className="text-center mt-8">
+                  <p className="text-[#024a9b] text-sm sm:text-base">
+                    제작한 한글 암호 사진을 업로드해서
+                    <br />
+                    AI 해독을 시도해보세요.
+                  </p>
+                  <p className="text-[#6b7280] text-[11px] mt-1">
+                    *원활한 이용을 위해 데이터를 사용해주세요.
+                  </p>
+                </div>
               )}
 
               {messages.map((m, idx) => (
