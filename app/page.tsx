@@ -86,7 +86,7 @@ export default function Home() {
   }
 
   return (
-    <main className="flex flex-col h-screen mx-auto max-w-3xl p-4 sm:p-6 text-[#024a9b] bg-white">
+    <main className="flex flex-col h-svh mx-auto max-w-3xl p-4 sm:p-6 text-[#024a9b] bg-white">
       {/* ✅ 로고 */}
       <div className="flex justify-center mb-4 mt-6 shrink-0">
         {/* (수정) Next.js <Image>를 표준 <img> 태그로 변경 */}

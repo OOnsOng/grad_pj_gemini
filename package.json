@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "ai": "^5.0.86",
     "formidable": "^3.5.4",
     "nanoid": "^5.1.5",
     "next": "15.5.3",
