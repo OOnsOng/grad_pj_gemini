@@ -183,7 +183,7 @@ export default function Home() {
                 <div className="text-left">
                   <div className="inline-block rounded-xl px-3 py-2 sm:px-4 sm:py-2.5 bg-gray-100 text-[#024a9b] max-w-[66%]">
                     {messages[messages.length - 1]?.imageUrl ? (
-                      <div className="typing-text">해독중.. 약 30초 소요</div>
+                      <div className="typing-text">해독중.. 약 1분 소요</div>
                     ) : (
                       <div className="typing-text">답변중...</div>
                     )}
