@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
       // --- 1. 이미지가 있는 경우 (Pro 모델 사용) ---
 
       // (수정) Pro 모델을 여기서 정의
-      const model = client.getGenerativeModel({ model: 'gemini-2.5-pro' });
+      const model = client.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
       // 지시사항 (TextPart)
       const instruction: TextPart = {
